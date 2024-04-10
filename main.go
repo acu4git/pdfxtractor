@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/unidoc/unipdf/v3/common/license"
 )
@@ -11,32 +15,64 @@ func init() {
 	apiKey := os.Getenv("UNIPDF_API_KEY")
 	err := license.SetMeteredKey(apiKey)
 	if err != nil {
-		fmt.Printf("ERROR: Failed to set metered key: %v\n", err)
-		fmt.Printf("Make sure to get a valid key from https://cloud.unidoc.io\n")
 		panic(err)
 	}
 }
 
 func main() {
-	lk := license.GetLicenseKey()
-	if lk == nil {
-		fmt.Printf("Failed retrieving license key")
+	pdfURL := "https://www.kit.ac.jp/wp/wp-content/uploads/2024/04/R6hpsyougakukinitiran20240408.pdf"
+
+	filename := getFilename(pdfURL)
+
+	err := downloadFile(pdfURL, filename)
+	if err != nil {
+		fmt.Println("Error downloading file:", err)
 		return
 	}
-	fmt.Printf("License: %s\n", lk.ToString())
+	fmt.Println("File downloaded successfully")
 
-	// GetMeteredState freshly checks the state, contacting the licensing server.
-	state, err := license.GetMeteredState()
+	time.Sleep(time.Second * 5)
+	if err = deleteFile(filename); err != nil {
+		fmt.Println("Error deleting file:", err)
+	}
+}
+
+func getFilename(path string) string {
+	pathElems := strings.Split(path, "/")
+	return pathElems[len(pathElems)-1]
+}
+
+func downloadFile(url string, filename string) error {
+
+	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("ERROR getting metered state: %+v\n", err)
-		panic(err)
+		return err
 	}
-	fmt.Printf("State: %+v\n", state)
-	if state.OK {
-		fmt.Printf("State is OK\n")
-	} else {
-		fmt.Printf("State is not OK\n")
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %s", resp.Status)
 	}
-	fmt.Printf("Credits: %v\n", state.Credits)
-	fmt.Printf("Used credits: %v\n", state.Used)
+
+	outFile, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+
+	_, err = io.Copy(outFile, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deleteFile(filename string) error {
+	err := os.Remove(filename)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
