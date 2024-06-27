@@ -2,8 +2,8 @@ import pdfplumber
 import pandas as pd
 
 # PDFファイルのパス
-pdf_path = './sample.pdf'
-csv_path = './csv_plum/'
+pdf_path = './target.pdf'
+csv_path = './csv/'
 
 # PDFファイルを開く
 with pdfplumber.open(pdf_path) as pdf:
