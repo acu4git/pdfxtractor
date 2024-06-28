@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -10,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 )
-
-var wtr = bufio.NewWriter(os.Stdout)
 
 func main() {
 	// ディレクトリをオープンする
@@ -58,7 +55,16 @@ func main() {
 					continue
 				}
 
-				cell = strings.Replace(cell, "\n", "", -1)
+				cell = strings.Replace(cell, " ", "", -1)
+				cell = strings.Replace(cell, "①", "(1)", -1)
+				cell = strings.Replace(cell, "②", "(2)", -1)
+				cell = strings.Replace(cell, "③", "(3)", -1)
+				cell = strings.Replace(cell, "④", "(4)", -1)
+				cell = strings.Replace(cell, "⑤", "(5)", -1)
+				cell = strings.Replace(cell, "⑥", "(6)", -1)
+				cell = strings.Replace(cell, "⑦", "(7)", -1)
+				cell = strings.Replace(cell, "⑧", "(8)", -1)
+				cell = strings.Replace(cell, "⑨", "(9)", -1)
 				switch i {
 				case 0:
 					info.updatedAt = cell
@@ -92,21 +98,19 @@ func main() {
 
 	}
 	for i, str := range scholarshipInfos {
-
-		fmt.Fprintf(wtr, "---------------%d件目---------------\n", i)
-		fmt.Fprintln(wtr, "掲示日", str.updatedAt)
-		fmt.Fprintln(wtr, "奨学会名等", str.association)
-		fmt.Fprintln(wtr, "住所", str.address)
-		fmt.Fprintln(wtr, "対象(学部・院)", str.target.course)
-		fmt.Fprintln(wtr, "対象(詳細)", str.target.detail)
-		fmt.Fprintln(wtr, "年額・月額", str.paymentInfo.amountInfo)
-		fmt.Fprintln(wtr, "貸与・給付", str.paymentInfo.scholarshipType)
-		fmt.Fprintln(wtr, "募集人員", str.capacity)
-		fmt.Fprintln(wtr, "申請期限等", str.deadline)
-		fmt.Fprintln(wtr, "担当窓口", str.pic)
-		fmt.Fprintln(wtr, "備考", str.remark)
-		fmt.Fprintln(wtr)
-		wtr.Flush()
+		fmt.Printf("---------------%d件目---------------\n", i+1)
+		fmt.Println("***掲示日***\n", str.updatedAt)
+		fmt.Println("\n***奨学会名等***\n", str.association)
+		fmt.Println("\n***住所***\n", str.address)
+		fmt.Println("\n***対象(学部・院)***\n", str.target.course)
+		fmt.Println("\n***対象(詳細)***\n", str.target.detail)
+		fmt.Println("\n***年額・月額***\n", str.paymentInfo.amountInfo)
+		fmt.Println("\n***貸与・給付***\n", str.paymentInfo.scholarshipType)
+		fmt.Println("\n***募集人員***\n", str.capacity)
+		fmt.Println("\n***申請期限等***\n", str.deadline)
+		fmt.Println("\n***担当窓口***\n", str.pic)
+		fmt.Println("\n***備考***\n", str.remark)
+		fmt.Println()
 	}
 
 	os.RemoveAll(csvPath)
