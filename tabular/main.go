@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+var wtr = bufio.NewWriter(os.Stdout)
 
 func main() {
 	// ディレクトリをオープンする
@@ -89,18 +92,21 @@ func main() {
 
 	}
 	for i, str := range scholarshipInfos {
-		fmt.Printf("---------------%d件目---------------\n", i)
-		fmt.Println("掲示日", str.updatedAt)
-		fmt.Println("奨学会名等", str.association)
-		fmt.Println("住所", str.address)
-		fmt.Println("対象(学部・院)", str.target.course)
-		fmt.Println("対象(詳細)", str.target.detail)
-		fmt.Println("年額・月額", str.paymentInfo.amountInfo)
-		fmt.Println("貸与・給付", str.paymentInfo.scholarshipType)
-		fmt.Println("募集人員", str.capacity)
-		fmt.Println("申請期限等", str.deadline)
-		fmt.Println("担当窓口", str.pic)
-		fmt.Println("備考", str.remark)
+
+		fmt.Fprintf(wtr, "---------------%d件目---------------\n", i)
+		fmt.Fprintln(wtr, "掲示日", str.updatedAt)
+		fmt.Fprintln(wtr, "奨学会名等", str.association)
+		fmt.Fprintln(wtr, "住所", str.address)
+		fmt.Fprintln(wtr, "対象(学部・院)", str.target.course)
+		fmt.Fprintln(wtr, "対象(詳細)", str.target.detail)
+		fmt.Fprintln(wtr, "年額・月額", str.paymentInfo.amountInfo)
+		fmt.Fprintln(wtr, "貸与・給付", str.paymentInfo.scholarshipType)
+		fmt.Fprintln(wtr, "募集人員", str.capacity)
+		fmt.Fprintln(wtr, "申請期限等", str.deadline)
+		fmt.Fprintln(wtr, "担当窓口", str.pic)
+		fmt.Fprintln(wtr, "備考", str.remark)
+		fmt.Fprintln(wtr)
+		wtr.Flush()
 	}
 
 	os.RemoveAll(csvPath)
