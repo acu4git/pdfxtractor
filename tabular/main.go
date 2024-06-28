@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -19,12 +20,17 @@ func main() {
 	}
 	defer dir.Close()
 
-	// ディレクトリ下の情報を取り出す
+	// ディレクトリ下の情報を取り出す(順番は保証されていない)
 	fileInfos, _ := dir.ReadDir(0)
 	if err != nil {
 		fmt.Println("Error reading directory:", err)
 		return
 	}
+
+	// ソートしてファイル番号を昇順にする
+	sort.Slice(fileInfos, func(i, j int) bool {
+		return fileInfos[i].Name() < fileInfos[j].Name()
+	})
 
 	// ファイルごとに処理する
 	scholarshipInfos := []scholarship{}
@@ -49,47 +55,47 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			for i, cell := range record {
-				if shouldIgnore(cell) {
-					// fmt.Println("---------------------Ignore!----------------------")
+			for i, field := range record {
+				if shouldIgnore(field) {
 					continue
 				}
 
-				cell = strings.Replace(cell, " ", "", -1)
-				cell = strings.Replace(cell, "①", "(1)", -1)
-				cell = strings.Replace(cell, "②", "(2)", -1)
-				cell = strings.Replace(cell, "③", "(3)", -1)
-				cell = strings.Replace(cell, "④", "(4)", -1)
-				cell = strings.Replace(cell, "⑤", "(5)", -1)
-				cell = strings.Replace(cell, "⑥", "(6)", -1)
-				cell = strings.Replace(cell, "⑦", "(7)", -1)
-				cell = strings.Replace(cell, "⑧", "(8)", -1)
-				cell = strings.Replace(cell, "⑨", "(9)", -1)
+				field = strings.Replace(field, " ", "", -1)
+				field = strings.Replace(field, "①", "(1)", -1)
+				field = strings.Replace(field, "②", "(2)", -1)
+				field = strings.Replace(field, "③", "(3)", -1)
+				field = strings.Replace(field, "④", "(4)", -1)
+				field = strings.Replace(field, "⑤", "(5)", -1)
+				field = strings.Replace(field, "⑥", "(6)", -1)
+				field = strings.Replace(field, "⑦", "(7)", -1)
+				field = strings.Replace(field, "⑧", "(8)", -1)
+				field = strings.Replace(field, "⑨", "(9)", -1)
+
 				switch i {
 				case 0:
-					info.updatedAt = cell
+					info.updatedAt = field
 				case 1:
-					info.association = cell
+					info.association = field
 				case 2:
-					info.address = cell
+					info.address = field
 				case 3:
-					info.target.course = cell
+					info.target.course = field
 				case 4:
-					info.target.detail = cell
+					info.target.detail = field
 				case 5:
-					info.paymentInfo.amountInfo = cell
+					info.paymentInfo.amountInfo = field
 				case 6:
-					info.paymentInfo.scholarshipType = cell
+					info.paymentInfo.scholarshipType = field
 				case 7:
-					info.capacity = cell
+					info.capacity = field
 				case 8:
-					info.deadline = cell
+					info.deadline = field
 				case 9:
-					info.pic = cell
+					info.pic = field
 				case 10:
-					info.remark = cell
+					info.remark = field
 				}
-				// fmt.Printf("%v個目: %s\n", i, cell)
+				// fmt.Printf("%v個目: %s\n", i, field)
 			}
 			if info.updatedAt != "" {
 				scholarshipInfos = append(scholarshipInfos, info)
@@ -116,13 +122,13 @@ func main() {
 	os.RemoveAll(csvPath)
 }
 
-func shouldIgnore(cell string) bool {
+func shouldIgnore(field string) bool {
 	ignoreStrings := []string{
 		"掲示日", "奨学会名等", "住所", "対象(学部・院)", "対象(詳細)", "年額・月額", "給与・貸与", "募集人員", "申請期限等", "担当窓口", "備考",
 		"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
 	}
 	for _, str := range ignoreStrings {
-		if cell == str {
+		if field == str {
 			return true
 		}
 	}
@@ -140,7 +146,7 @@ type paymentInfo struct {
 }
 
 type scholarship struct {
-	updatedAt   string // いずれtime.Timeにする予定
+	updatedAt   string
 	association string
 	address     string
 	target      target
