@@ -16,6 +16,8 @@ with pdfplumber.open(pdf_path) as pdf:
         for table in extracted_tables:
             tables.append(table)
 
+os.remove(pdf_path)
+
 # テーブルをデータフレームに変換し、CSVに保存
 for i, table in enumerate(tables):
     df = pd.DataFrame(table)

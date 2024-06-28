@@ -102,6 +102,8 @@ func main() {
 		fmt.Println("担当窓口", str.pic)
 		fmt.Println("備考", str.remark)
 	}
+
+	os.RemoveAll(csvPath)
 }
 
 func shouldIgnore(cell string) bool {

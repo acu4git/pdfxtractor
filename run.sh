@@ -10,3 +10,5 @@ deactivate
 
 cd ../tabular
 go run main.go
+
+cd ..
