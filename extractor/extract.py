@@ -1,11 +1,13 @@
 import pdfplumber
 import pandas as pd
+import os
 
 # PDFファイルのパス
 pdf_path = './target.pdf'
 csv_path = './csv/'
 
 # PDFファイルを開く
+os.mkdir("./csv")
 with pdfplumber.open(pdf_path) as pdf:
     tables = []
     for page in pdf.pages:
