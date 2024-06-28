@@ -42,4 +42,4 @@ go.work
 # End of https://www.toptal.com/developers/gitignore/api/go,linux
 
 *.pdf
-.venv/*
+extractor/.venv/
