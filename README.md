@@ -19,6 +19,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+また，Go の各モジュールにて go mod tidy しておいてください
+
+```bash
+go mod tidy
+```
+
+プロジェクトのルートディレクトリにて実行
+
 ```bash
 source run.sh
 ```
