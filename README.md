@@ -10,16 +10,13 @@
 
 # 使い方
 
-venv を使うことを前提としています．とりあえず，仮想環境名は'.venv'にしておいてください．すみません orz
-requirements.txt から pip install をお願いします．
+extractor では requirements.txt から pip install をお願いします．
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-また，Go の各モジュールにて go mod tidy しておいてください
+また，Go の各モジュール(scraper, tabular)にて go mod tidy しておいてください
 
 ```bash
 go mod tidy
