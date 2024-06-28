@@ -3,10 +3,9 @@
 cd scraper
 go run main.go
 
+#venvを使っている場合は予めactivateにするように
 cd ../extractor
-source .venv/bin/activate
 python extract.py
-deactivate
 
 cd ../tabular
 go run main.go

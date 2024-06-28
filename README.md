@@ -10,6 +10,15 @@
 
 # 使い方
 
+venv を使うことを前提としています．とりあえず，仮想環境名は'.venv'にしておいてください．すみません orz
+requirements.txt から pip install をお願いします．
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 ```bash
 source run.sh
 ```
