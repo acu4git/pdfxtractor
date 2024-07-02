@@ -38,7 +38,7 @@ func scrape(url, pattern string) (string, error) {
 	doc.Find("a").Each(func(index int, item *goquery.Selection) {
 		href, exists := item.Attr("href")
 		if exists && re.MatchString(href) {
-			fmt.Printf("found link: %s\n", href)
+			// fmt.Printf("found link: %s\n", href)
 			url = href
 			found = true
 		}
@@ -55,6 +55,7 @@ func main() {
 	// スクレイピング
 	url := "https://www.kit.ac.jp/campus_index/life_fee/scholarship/minkanscholarship/" // 対象PDFファイルが掲載されているHP
 	linkPattern := `https://www\.kit\.ac\.jp/wp/wp-content/uploads/\d{4}/\d{2}/.*hpsyougakukinitiran.*\.pdf`
+	fmt.Print("scraping...")
 	url, err := scrape(url, linkPattern)
 	if err != nil {
 		log.Fatal(err)
@@ -78,4 +79,5 @@ func main() {
 		log.Fatal(err)
 	}
 	io.Copy(f, res.Body)
+	fmt.Println("completed.")
 }
