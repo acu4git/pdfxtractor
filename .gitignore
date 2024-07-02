@@ -43,4 +43,4 @@ go.work
 
 *.pdf
 .venv/
-result.txt
+./result.txt
