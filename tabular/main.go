@@ -13,11 +13,13 @@ import (
 	"time"
 )
 
-type userTarget uint16
+type userTarget int
 
 const (
-	bachelor = iota
+	bachelor userTarget = iota + 1
 	master
+	other
+	all
 )
 
 type target struct {
@@ -31,7 +33,7 @@ type paymentInfo struct {
 }
 
 type scholarship struct {
-	postDay     string
+	postDate    string
 	association string
 	address     string
 	target      target
@@ -42,13 +44,15 @@ type scholarship struct {
 	remark      string
 }
 
-func getUserInput() int {
+func getUserInput() userTarget {
+	fmt.Println()
 	fmt.Println("表示させたい奨学金一覧の対象について数字(1~4)で入力してください．")
+	fmt.Println("-------------------------------------------------------------------")
 	fmt.Println("1. 学部生")
 	fmt.Println("2. 大学院生")
 	fmt.Println("3. その他")
 	fmt.Println("4. 全部")
-	fmt.Println()
+	fmt.Println("-------------------------------------------------------------------")
 
 	var input string
 	var num int
@@ -75,9 +79,10 @@ func getUserInput() int {
 		break
 	}
 
-	return num
+	return userTarget(num)
 }
 
+// 無視する項目の処理
 func shouldIgnore(field string) bool {
 	ignoreStrings := []string{
 		"掲示日", "奨学会名等", "住所", "対象(学部・院)", "対象(詳細)", "年額・月額", "給与・貸与", "募集人員", "申請期限等", "担当窓口", "備考",
@@ -131,11 +136,15 @@ func parseDate(dateStr string) (string, error) {
 }
 
 func main() {
-	fmt.Println("")
+	// ユーザー入力部
+	tagetInfo := getUserInput()
 
-	scholarshipInfos := []scholarship{}
+	// 現在時刻の取得
+	curr := time.Now()
+	fmt.Println(curr)
 
 	// それぞれのCSVファイルについて処理を行う
+	scholarshipInfos := []scholarship{}
 	csvPath := "../extractor/csv/"
 	err := filepath.WalkDir(csvPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -184,7 +193,7 @@ func main() {
 
 				switch i {
 				case 0:
-					info.postDay = field
+					info.postDate = field
 				case 1:
 					info.association = field
 				case 2:
@@ -209,22 +218,56 @@ func main() {
 				// fmt.Printf("%v個目: %s\n", i, field)
 			}
 
+			// 掲示日が古すぎないかどうか
+			if info.postDate == "" {
+				continue
+			}
+			date, err := parseDate(info.postDate)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			old, _ := time.Parse("2006-01-02", date)
+			diff := curr.Sub(old)
+			// 掲示日から1年以上経っている情報は捨てる
+			if int(diff.Hours()/24) > 365 {
+				continue
+			}
+
+			// 指定した対象のみ抽出
+			switch tagetInfo {
+			case bachelor:
+				if !strings.Contains(info.target.course, "学部") {
+					continue
+				}
+			case master:
+				if !strings.Contains(info.target.course, "大学院") {
+					continue
+				}
+			case other:
+				if !strings.Contains(info.target.course, "その他") {
+					continue
+				}
+			case all:
+			default:
+				fmt.Println("このメッセージは表示されないはずだぴょん:", "targetInfo")
+			}
+
+			// 申請期限が切れているかどうか
 			dateInfo, _, found := strings.Cut(info.deadline, "(")
-			// 申請期限がある場合について
 			if found {
 				date, err := parseDate(dateInfo)
 				if err != nil {
 					fmt.Println(err)
 					continue
 				}
-				if date < time.Now().Format("2006-01-02") {
+				if date < curr.Format("2006-01-02") {
 					continue
 				}
 			}
-			if info.postDay != "" {
-				scholarshipInfos = append(scholarshipInfos, info)
-			}
 
+			// 条件が合致していれば追加
+			scholarshipInfos = append(scholarshipInfos, info)
 		}
 		return nil
 	})
@@ -233,21 +276,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for i, str := range scholarshipInfos {
-		fmt.Printf("---------------%d件目---------------\n", i+1)
-		fmt.Println("***掲示日***\n", str.postDay)
-		fmt.Println("\n***奨学会名等***\n", str.association)
-		fmt.Println("\n***住所***\n", str.address)
-		fmt.Println("\n***対象(学部・院)***\n", str.target.course)
-		fmt.Println("\n***対象(詳細)***\n", str.target.detail)
-		fmt.Println("\n***年額・月額***\n", str.paymentInfo.amountInfo)
-		fmt.Println("\n***貸与・給付***\n", str.paymentInfo.scholarshipType)
-		fmt.Println("\n***募集人員***\n", str.capacity)
-		fmt.Println("\n***申請期限等***\n", str.deadline)
-		fmt.Println("\n***担当窓口***\n", str.pic)
-		fmt.Println("\n***備考***\n", str.remark)
-		fmt.Println()
+	outFile, err := os.Create("../result.txt")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// os.RemoveAll(csvPath)
+	for i, str := range scholarshipInfos {
+		fmt.Fprintf(outFile, "---------------%d件目---------------\n", i+1)
+		fmt.Fprintln(outFile, "***掲示日***\n", str.postDate)
+		fmt.Fprintln(outFile, "\n***奨学会名等***\n", str.association)
+		fmt.Fprintln(outFile, "\n***住所***\n", str.address)
+		fmt.Fprintln(outFile, "\n***対象(学部・院)***\n", str.target.course)
+		fmt.Fprintln(outFile, "\n***対象(詳細)***\n", str.target.detail)
+		fmt.Fprintln(outFile, "\n***年額・月額***\n", str.paymentInfo.amountInfo)
+		fmt.Fprintln(outFile, "\n***貸与・給付***\n", str.paymentInfo.scholarshipType)
+		fmt.Fprintln(outFile, "\n***募集人員***\n", str.capacity)
+		fmt.Fprintln(outFile, "\n***申請期限等***\n", str.deadline)
+		fmt.Fprintln(outFile, "\n***担当窓口***\n", str.pic)
+		fmt.Fprintln(outFile, "\n***備考***\n", str.remark)
+		fmt.Fprintln(outFile)
+	}
+
+	os.RemoveAll(csvPath)
 }
