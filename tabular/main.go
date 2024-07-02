@@ -300,6 +300,6 @@ func main() {
 		fmt.Fprintln(outFile)
 	}
 
-	fmt.Println("Finished!")
+	fmt.Println("Saved to result.txt!")
 	os.RemoveAll(csvPath)
 }
