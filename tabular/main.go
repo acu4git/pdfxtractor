@@ -160,10 +160,10 @@ func main() {
 		// fmt.Printf("file 1: %s\n", d.Name())
 
 		f, err := os.Open(path)
-		defer f.Close()
 		if err != nil {
 			return err
 		}
+		defer f.Close()
 
 		r := csv.NewReader(f)
 		for {
