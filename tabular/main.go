@@ -96,7 +96,7 @@ func shouldIgnore(field string) bool {
 	return false
 }
 
-// 元号表記の日付をyyyy-mm-dd形式に変換
+// 元号表記(令和yy年mm月dd日)の日付をyyyy-mm-dd形式に変換
 func parseDate(dateStr string) (string, error) {
 	// 元年からのオフセット(適時追加)
 	const reiwaStartYear = 2019
@@ -141,7 +141,6 @@ func main() {
 
 	// 現在時刻の取得
 	curr := time.Now()
-	fmt.Println(curr)
 
 	// それぞれのCSVファイルについて処理を行う
 	scholarshipInfos := []scholarship{}
@@ -151,8 +150,8 @@ func main() {
 			return err
 		}
 
+		// ディレクトリの場合はスキップ
 		if d.IsDir() {
-			// ディレクトリの場合はスキップ
 			return nil
 		}
 
@@ -165,9 +164,11 @@ func main() {
 		}
 		defer f.Close()
 
+		// レコードの処理
 		r := csv.NewReader(f)
 		for {
 			info := scholarship{}
+			// 1つのレコードを取得
 			record, err := r.Read()
 			if err == io.EOF {
 				break
@@ -180,6 +181,7 @@ func main() {
 					continue
 				}
 
+				// 下処理
 				field = strings.TrimSpace(field)
 				field = strings.Replace(field, "①", "(1)", -1)
 				field = strings.Replace(field, "②", "(2)", -1)
@@ -234,7 +236,7 @@ func main() {
 				continue
 			}
 
-			// 指定した対象のみ抽出
+			// 指定した対象を含んだデータのみ抽出
 			switch tagetInfo {
 			case bachelor:
 				if !strings.Contains(info.target.course, "学部") {
@@ -248,7 +250,7 @@ func main() {
 				if !strings.Contains(info.target.course, "その他") {
 					continue
 				}
-			case all:
+			case all: //何もしない
 			default:
 				fmt.Println("このメッセージは表示されないはずだぴょん:", "targetInfo")
 			}
@@ -281,6 +283,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Fprintf(outFile, "更新日: %d年%d月%d日\n\n", curr.Year(), curr.Month(), curr.Day())
 	for i, str := range scholarshipInfos {
 		fmt.Fprintf(outFile, "---------------%d件目---------------\n", i+1)
 		fmt.Fprintln(outFile, "***掲示日***\n", str.postDate)
@@ -297,5 +300,6 @@ func main() {
 		fmt.Fprintln(outFile)
 	}
 
+	fmt.Println("Finished!")
 	os.RemoveAll(csvPath)
 }
