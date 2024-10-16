@@ -8,6 +8,10 @@
 - Python 3.10.12
 - Ubuntu 22.04.4 LTS on Windows 10 x86_64
 
+# 実行例
+
+<img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2Nmazc0OGFrd3Q1MmQ4dGptOXgxaG9zZm04YTZzbTR0dGhkZmE5eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/se7kf3OHIHlOpwUJJQ/giphy.gif" alt="pdfxtractor">
+
 # 使い方
 
 extractor では requirements.txt から pip install をお願いします．
